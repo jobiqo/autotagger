@@ -20,7 +20,7 @@ class AutotaggerTest extends UnitTestCase {
     $term = "hello, world, .";
     $split = $autotagger->splitText($term);
 
-    $this->assertEquals(['hello', 'world'], $term);
+    $this->assertEquals(['hello', 'world'], $split);
   }
 
   public function testZeroSplitText() {
