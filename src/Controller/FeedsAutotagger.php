@@ -31,4 +31,26 @@ class FeedsAutotagger {
     // Filter out any remaining empty strings after the split.
     return preg_split("/[" . self::WORD_SPLIT_REGEX . "]+/u", $term, -1, PREG_SPLIT_NO_EMPTY);
   }
+
+  /**
+   * Prepares a text from an XML element so it can be split into words.
+   *
+   * @param string $text
+   *   The text from an XML node that should be later split into a word array.
+   *
+   * @return string
+   *   The text with all xml and html elements removed. The text is also
+   *   converted to lower case.
+   */
+  public function prepareXMLText(string $text) : string {
+    $text = preg_replace('/<!\[CDATA\[(.*?)\]\]>/is', '$1', $text);
+    // strip_tags() does not introduce any white space for concatenated tags.
+    // Example: "<h1>Hello</h1>Body text here." would become "HelloBody text here."
+    $text = preg_replace('/(<[^>]+>)/', '$1 ', $text);
+    $text = strip_tags($text);
+    $text = mb_strtolower($text);
+    $text = trim($text);
+    return $text;
+
+  }
 }

@@ -31,4 +31,13 @@ class AutotaggerTest extends UnitTestCase {
 
     $this->assertEquals(['0', 'years'], $split);
   }
+
+  public function testPrepareXMlText() {
+    $autotagger = new FeedsAutotagger();
+
+    $xml_text = '<![CDATA[<h1>Hello</h1>Body text here.]]>';
+    $clean = $autotagger->prepareXMLText($xml_text);
+
+    $this->assertEquals('hello body text here.', $clean);
+  }
 }
