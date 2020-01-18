@@ -1,18 +1,15 @@
 <?php
 
 
-namespace Drupal\feeds_autotagger\Controller;
+namespace Drupal\feeds_autotagger\Autotagger;
 
-
-class FeedsAutotagger {
+/**
+ * Autotags texts by matching terms.
+ *
+ * @package Drupal\feeds_autotagger\Autotagger
+ */
+class TaxonomyAutotagger implements AutotaggerInterface {
   const WORD_SPLIT_REGEX = '\pC\pM\pP\pZ';
-
-  public function content() {
-    return [
-      '#type' => 'markup',
-      '#markup' => t('Hello World!'),
-    ];
-  }
 
   /**
    * Splits a given text into separate words.
@@ -51,6 +48,10 @@ class FeedsAutotagger {
     $text = mb_strtolower($text);
     $text = trim($text);
     return $text;
-
   }
+
+  public function tagText(string $text): array {
+    // TODO: Implement tagText() method.
+  }
+
 }

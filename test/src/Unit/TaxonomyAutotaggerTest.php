@@ -13,7 +13,7 @@ use Drupal\Tests\UnitTestCase;
  *
  * @group feeds_autotagger.
  */
-class AutotaggerTest extends UnitTestCase {
+class TaxonomyAutotaggerTest extends UnitTestCase {
   public function testSplitText() {
     $autotagger = new FeedsAutotagger();
 
