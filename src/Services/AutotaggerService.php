@@ -23,9 +23,7 @@ class AutotaggerService {
   protected $database;
 
   public function __construct(\Drupal\Core\Database\Connection $database) {
-    //@todo: replace with DI.
     $this->database = $database;
-    $this->vocabulary = '';
   }
 
   /**
