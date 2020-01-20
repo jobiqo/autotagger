@@ -16,11 +16,6 @@ class AutotaggerService {
   const WORD_SPLIT_REGEX = '\pC\pM\pP\pZ';
 
   /**
-   * @var
-   */
-  protected $vocabulary;
-
-  /**
    * The database connection.
    *
    * @var \Drupal\Core\Database\Connection
@@ -89,54 +84,20 @@ class AutotaggerService {
     foreach ($name_splits as $split) {
       $terms[$split][] = [
         'tid' => $tid,
-        'splitted' => (count($name_splits) > 1) ? TRUE : FALSE,
+        'split' => (count($name_splits) > 1) ? TRUE : FALSE,
         'original_term_name' => $name,
       ];
     }
   }
 
   /**
-   * {@inheritDoc}
-   */
-  public function tagText(string $text): array {
-    $extracted_tids = [];
-
-    $terms = $this->getTermNames($this->vocabulary);
-
-    $text = self::cleanText($text);
-    $text_tokens = array_flip(self::cleanText($text));
-
-    $matchings_term_splits = array_intersect_key($terms, $text_tokens);
-
-    // Loops over all matched splits and checks if a term name consists
-    // of multiple splits. If so, an additional text parsing for the whole
-    // term name is performed.
-    foreach ($matchings_term_splits as $results) {
-      foreach ($results as $result) {
-        $tid = $result['tid'];
-        if (!in_array($tid, $extracted_tids)) {
-          if ($result['splitted']) {
-            // The compound word needs to be at the start or end of the text or
-            // separated by split characters form the other text.
-            if (preg_match('/(^|[' . RULES_AUTOTAG_SPLIT_REGEX . ']+)' . preg_quote($result['original_term_name'], '/') . '($|[' . RULES_AUTOTAG_SPLIT_REGEX . ']+)/ui', $text)) {
-              $extracted_tids[] = $tid;
-            }
-          }
-          else {
-            $extracted_tids[] = $tid;
-          }
-        }
-      }
-    }
-
-    return $extracted_tids;
-  }
-
-  /**
-   * Returns an array of terms, keyed by splitted term names.
+   * Returns an array of terms, keyed by split term names.
    *
-   * The structure can be modified with hook_rules_autotag_terms_alter()
-   * implementations.
+   * @param string $vocabulary
+   *   The vocabulary from which to use the terms.
+   *
+   * @return array
+   *   An array of split term names with the term info for each of them.
    */
   public function getTermNames(string $vocabulary) : array {
     $terms = drupal_static(__METHOD__, []);
@@ -154,6 +115,51 @@ class AutotaggerService {
     }
 
     return $terms[$vocabulary];
+  }
+
+  /**
+   * The the given text with the terms of the given vocabulary.
+   *
+   * @param string $text
+   *   The text to tag.
+   * @param string $vocabulary
+   *   The vocabulary that should be used.
+   *
+   * @return []int
+   *   The term IDs of the terms that match the text.
+   */
+  public function tagText(string $text, string $vocabulary): array {
+    $extracted_tids = [];
+
+    $terms = $this->getTermNames($vocabulary);
+
+    $text = self::cleanText($text);
+    $text_tokens = array_flip(self::splitText($text));
+
+    $matching_term_splits = array_intersect_key($terms, $text_tokens);
+
+    // Loops over all matched splits and checks if a term name consists
+    // of multiple splits. If so, an additional text parsing for the whole
+    // term name is performed.
+    foreach ($matching_term_splits as $results) {
+      foreach ($results as $result) {
+        $tid = $result['tid'];
+        if (!in_array($tid, $extracted_tids)) {
+          if ($result['split']) {
+            // The compound word needs to be at the start or end of the text or
+            // separated by split characters form the other text.
+            if (preg_match('/(^|[' . self::WORD_SPLIT_REGEX . ']+)' . preg_quote($result['original_term_name'], '/') . '($|[' . self::WORD_SPLIT_REGEX . ']+)/ui', $text)) {
+              $extracted_tids[] = $tid;
+            }
+          }
+          else {
+            $extracted_tids[] = $tid;
+          }
+        }
+      }
+    }
+
+    return $extracted_tids;
   }
 
 }
