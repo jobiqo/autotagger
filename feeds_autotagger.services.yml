@@ -1,0 +1,5 @@
+services:
+  feeds_autotagger.taxonomy_autotagger:
+    class: Drupal\feeds_autotagger\Services\AutotaggerService
+    arguments:
+      - '@database'

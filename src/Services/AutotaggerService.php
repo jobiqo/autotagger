@@ -1,16 +1,18 @@
 <?php
 
 
-namespace Drupal\feeds_autotagger\Autotagger;
+namespace Drupal\feeds_autotagger\Services;
 
 /**
- * Autotags texts by matching terms.
+ * Autotags texts by matching similar terms.
  *
- * @package Drupal\feeds_autotagger\Autotagger
+ * @todo: find a better name.
+ *
+ * @package Drupal\feeds_autotagger\Services
  *
  * @AutotaggerPlugin
  */
-class TaxonomyAutotagger {
+class AutotaggerService {
   const WORD_SPLIT_REGEX = '\pC\pM\pP\pZ';
 
   /**
@@ -25,10 +27,10 @@ class TaxonomyAutotagger {
    */
   protected $database;
 
-  public function __construct($vocabulary) {
+  public function __construct(\Drupal\Core\Database\Connection $database) {
     //@todo: replace with DI.
-    $this->database = \Drupal::service('database');
-    $this->vocabulary = $vocabulary;
+    $this->database = $database;
+    $this->vocabulary = '';
   }
 
   /**
@@ -136,19 +138,18 @@ class TaxonomyAutotagger {
    * The structure can be modified with hook_rules_autotag_terms_alter()
    * implementations.
    */
-  protected function getTermNames(string $vocabulary) : array {
+  public function getTermNames(string $vocabulary) : array {
     $terms = drupal_static(__METHOD__, []);
 
-    if (!isset($terms[$vocabulary])) {
+    if (empty($terms[$vocabulary])) {
+      $terms[$vocabulary] = [];
 
-      $term[$vocabulary->vid] = [];
       $sql = 'SELECT name, tid FROM {taxonomy_term_field_data} AS t WHERE t.vid = :vocabulary';
-
       $query = $this->database->query($sql, [':vocabulary' => $vocabulary]);
       $result = $query->fetchAll();
 
       foreach ($result as $term) {
-        $this->buildNamesArray($terms, $term->name, $term->tid);
+        $this->buildNamesArray($terms[$vocabulary], $term->name, $term->tid);
       }
     }
 
