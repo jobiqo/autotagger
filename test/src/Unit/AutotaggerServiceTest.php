@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Drupal\Tests\feeds_autotagger\Unit;
+namespace Drupal\Tests\autotagger\Unit;
 
 
 use Drupal\feeds_autotagger\Services\AutotaggerService;

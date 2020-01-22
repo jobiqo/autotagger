@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Drupal\feeds_autotagger\Services;
+namespace Drupal\autotagger\Services;
 
 /**
  * Autotags texts by matching similar terms.
